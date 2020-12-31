@@ -21,4 +21,9 @@ public class GamePlugin extends JavaPlugin {
         getCommand("istart").setExecutor(new StartCommand(this, gameHolder, spawnLoc, getConfig().getString("tags")));
         getCommand("istop").setExecutor(new StopCommand(gameHolder));
     }
+
+    public void onDisable() {
+        if(gameHolder.getObject() != null)
+            gameHolder.getObject().disable();
+    }
 }
