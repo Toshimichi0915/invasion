@@ -55,20 +55,29 @@ public class GameState implements State, Listener, Runnable {
             if (ally == null) continue;
             Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
             player.setScoreboard(scoreboard);
-            for (GameTeam team : teams) {
-                Team bukkitTeam = scoreboard.registerNewTeam(team.getTag());
+
+            Team allyTeam = scoreboard.registerNewTeam(ally.getTag());
+            allyTeam.addEntry(ally.getOwner().getName());
+            for (Player citizen : ally.getCitizens()) {
+                allyTeam.addEntry(citizen.getName());
+            }
+            allyTeam.setAllowFriendlyFire(false);
+
+            for (Player enemy : Bukkit.getOnlinePlayers()) {
+                GameTeam team = getTeam(enemy);
+                if (team == null) continue;
                 ChatColor color;
-                if (ally == team) {
+                if (ally.equals(team)) {
                     color = ChatColor.GREEN;
-                    bukkitTeam.setAllowFriendlyFire(false);
                 } else {
                     color = ChatColor.RED;
                 }
-                bukkitTeam.setPrefix(color + "[" + team.getTag() + "]");
-                bukkitTeam.addEntry(team.getOwner().getName());
-                for (Player citizen : team.getCitizens()) {
-                    bukkitTeam.addEntry(citizen.getName());
+                Team enemyTeam = scoreboard.registerNewTeam(enemy.getName());
+                enemyTeam.setPrefix(color + "[" + team.getTag() + "] ");
+                if (team.getOwner().equals(enemy)) {
+                    enemyTeam.setSuffix(" (TOP)");
                 }
+                enemyTeam.addEntry(enemy.getName());
             }
         }
     }
@@ -91,7 +100,7 @@ public class GameState implements State, Listener, Runnable {
     public void disable() {
         System.out.println("ゲームが終了しました");
         HandlerList.unregisterAll(this);
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         }
         if (task != null) {
