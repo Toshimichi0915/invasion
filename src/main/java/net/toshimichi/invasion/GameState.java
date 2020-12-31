@@ -1,6 +1,7 @@
 package net.toshimichi.invasion;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -15,6 +16,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +49,30 @@ public class GameState implements State, Listener, Runnable {
         return null;
     }
 
+    private void updateScoreboard() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            GameTeam ally = getTeam(player);
+            if (ally == null) continue;
+            Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+            player.setScoreboard(scoreboard);
+            for (GameTeam team : teams) {
+                Team bukkitTeam = scoreboard.registerNewTeam(team.getTag());
+                ChatColor color;
+                if (ally == team) {
+                    color = ChatColor.GREEN;
+                    bukkitTeam.setAllowFriendlyFire(false);
+                } else {
+                    color = ChatColor.RED;
+                }
+                bukkitTeam.setPrefix(color + "[" + team.getTag() + "]");
+                bukkitTeam.addEntry(team.getOwner().getName());
+                for (Player citizen : team.getCitizens()) {
+                    bukkitTeam.addEntry(citizen.getName());
+                }
+            }
+        }
+    }
+
     @Override
     public void enable() {
         System.out.println("ゲームが開始しました");
@@ -57,12 +84,16 @@ public class GameState implements State, Listener, Runnable {
             killCount.put(player, 0);
             player.teleport(spawnLoc);
         }
+        updateScoreboard();
     }
 
     @Override
     public void disable() {
         System.out.println("ゲームが終了しました");
         HandlerList.unregisterAll(this);
+        for(Player player : Bukkit.getOnlinePlayers()) {
+            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        }
         if (task != null) {
             task.cancel();
         }
@@ -133,6 +164,7 @@ public class GameState implements State, Listener, Runnable {
             victimTeam.removeCitizen(e.getEntity());
             killerTeam.addCitizen(e.getEntity());
         }
+        updateScoreboard();
     }
 
     @EventHandler
