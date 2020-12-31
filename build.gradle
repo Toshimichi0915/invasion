@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots'
+    }
+}
+
+dependencies {
+    implementation 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+}
+
+compileJava {
+    options.encoding = 'utf-8'
+}

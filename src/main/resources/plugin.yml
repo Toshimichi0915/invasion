@@ -1,0 +1,17 @@
+name: invasion
+version: 1.0
+main: net.toshimichi.invasion.GamePlugin
+commands:
+  istart:
+    usage: /istart
+    description: ゲームを開始します
+    permission: invasion.start
+  istop:
+    usage: /istop
+    description: ゲームを終了します
+    permission: invasion.stop
+permissions:
+  invasion.start:
+    permission: op
+  invasion.stop:
+    permission: op
