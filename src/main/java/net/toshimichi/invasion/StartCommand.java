@@ -11,16 +11,18 @@ public class StartCommand implements CommandExecutor {
     private final Plugin plugin;
     private final Holder<State> holder;
     private final Location spawnLoc;
+    private final String tags;
 
-    public StartCommand(Plugin plugin, Holder<State> holder, Location spawnLoc) {
+    public StartCommand(Plugin plugin, Holder<State> holder, Location spawnLoc, String tags) {
         this.plugin = plugin;
         this.holder = holder;
         this.spawnLoc = spawnLoc;
+        this.tags = tags;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        GameState state = new GameState(plugin, spawnLoc);
+        GameState state = new GameState(plugin, spawnLoc, tags);
         holder.setObject(state);
         state.enable();
         return true;

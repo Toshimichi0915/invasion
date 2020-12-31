@@ -24,13 +24,16 @@ public class GameState implements State, Listener, Runnable {
 
     private final Plugin plugin;
     private final Location spawnLoc;
-    private BukkitTask task;
     private final Random random = new Random();
     private final ArrayList<GameTeam> teams = new ArrayList<>();
     private final HashMap<Player, Integer> killCount = new HashMap<>();
+    private final String tags;
+    private int tagCounter = 0;
+    private BukkitTask task;
 
-    public GameState(Plugin plugin, Location spawnLoc) {
+    public GameState(Plugin plugin, Location spawnLoc, String tags) {
         this.plugin = plugin;
+        this.tags = tags;
         this.spawnLoc = spawnLoc;
     }
 
@@ -49,7 +52,7 @@ public class GameState implements State, Listener, Runnable {
         Bukkit.getPluginManager().registerEvents(this, plugin);
         task = Bukkit.getScheduler().runTaskTimer(plugin, this, 0, 1);
         for (Player player : Bukkit.getOnlinePlayers()) {
-            GameTeam team = new GameTeam(player);
+            GameTeam team = new GameTeam(player, Character.toString(tags.charAt(tagCounter++)));
             teams.add(team);
             killCount.put(player, 0);
             player.teleport(spawnLoc);

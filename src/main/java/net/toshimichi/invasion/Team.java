@@ -10,6 +10,12 @@ import java.util.List;
 public interface Team {
 
     /**
+     * チームを表す短いタグを返します.
+     * @return タグ
+     */
+    String getTag();
+
+    /**
      * チーム名を返します.
      * @return チーム名
      */

@@ -8,11 +8,13 @@ import java.util.List;
 public class GameTeam implements Team {
 
     private final List<Player> victims = new ArrayList<>();
+    private final String tag;
     private Player owner;
     private String name;
 
-    public GameTeam(Player owner) {
+    public GameTeam(Player owner, String tag) {
         this.owner = owner;
+        this.tag = tag;
         newName();
     }
 
@@ -21,6 +23,11 @@ public class GameTeam implements Team {
      */
     private void newName() {
         name = owner.getName() + "のチーム";
+    }
+
+    @Override
+    public String getTag() {
+        return tag;
     }
 
     @Override

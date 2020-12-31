@@ -18,7 +18,7 @@ public class GamePlugin extends JavaPlugin {
         int z = getConfig().getInt("spawn.z");
         Location spawnLoc = new Location(world, x, y, z);
 
-        getCommand("istart").setExecutor(new StartCommand(this, gameHolder, spawnLoc));
+        getCommand("istart").setExecutor(new StartCommand(this, gameHolder, spawnLoc, getConfig().getString("tags")));
         getCommand("istop").setExecutor(new StopCommand(gameHolder));
     }
 }
