@@ -23,7 +23,7 @@ public class GamePlugin extends JavaPlugin {
     }
 
     public void onDisable() {
-        if(gameHolder.getObject() != null)
-            gameHolder.getObject().disable();
+        if(gameHolder.get() != null)
+            gameHolder.get().disable();
     }
 }

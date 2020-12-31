@@ -3,11 +3,11 @@ package net.toshimichi.invasion;
 public class Holder<T> {
     private T obj;
 
-    public T getObject() {
+    public T get() {
         return obj;
     }
 
-    public void setObject(T obj) {
+    public void set(T obj) {
         this.obj = obj;
     }
 }

@@ -23,7 +23,7 @@ public class StartCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         GameState state = new GameState(plugin, spawnLoc, tags);
-        holder.setObject(state);
+        holder.set(state);
         state.enable();
         return true;
     }
