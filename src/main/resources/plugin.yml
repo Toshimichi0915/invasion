@@ -14,10 +14,16 @@ commands:
     usage: /irevive
     description: 蘇生アイテムを入手します
     permission: invasion.revive
+  iloot:
+    usage: /iloot
+    description: チェスト内のアイテムを追加します
+    permission: invasion.iloot
 permissions:
   invasion.start:
     permission: op
   invasion.stop:
     permission: op
   invasion.revive:
+    permission: op
+  invasion.iloot:
     permission: op
