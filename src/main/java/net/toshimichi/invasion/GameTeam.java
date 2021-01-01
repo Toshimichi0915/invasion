@@ -22,7 +22,7 @@ public class GameTeam implements Team {
      * チーム名を更新します.
      */
     private void newName() {
-        name = owner.getName() + "のチーム";
+        name = owner.getName() + "帝国";
     }
 
     @Override

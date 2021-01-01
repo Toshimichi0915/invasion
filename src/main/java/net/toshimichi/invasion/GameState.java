@@ -23,10 +23,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GameState implements State, Listener, Runnable {
@@ -52,7 +49,7 @@ public class GameState implements State, Listener, Runnable {
     }
 
     private GameTeam getTeam(Player player) {
-        if(player == null) return null;
+        if (player == null) return null;
         for (GameTeam team : teams) {
             if (team.getOwner().equals(player) || team.getCitizens().contains(player)) {
                 return team;
@@ -94,6 +91,7 @@ public class GameState implements State, Listener, Runnable {
         task = Bukkit.getScheduler().runTaskTimer(plugin, this, 0, 1);
         for (Player player : Bukkit.getOnlinePlayers()) {
             GameTeam team = new GameTeam(player, Character.toString(tags.charAt(tagCounter++)));
+            player.setGameMode(GameMode.ADVENTURE);
             teams.add(team);
             killCount.put(player, 0);
         }
@@ -107,6 +105,7 @@ public class GameState implements State, Listener, Runnable {
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
             player.teleport(spawnLoc);
+            player.setGameMode(GameMode.ADVENTURE);
         }
         if (task != null) {
             task.cancel();
@@ -117,7 +116,19 @@ public class GameState implements State, Listener, Runnable {
     public void run() {
         // ゲーム終了
         if (teams.size() == 1) {
-            disable();
+            Bukkit.getScheduler().runTaskLater(plugin, this::disable, 100);
+            GameTeam winner = teams.get(0);
+            teams.clear();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.sendMessage(ChatColor.GOLD + winner.getName() + "の勝利");
+                List<Player> citizens = winner.getCitizens();
+                citizens.sort(Comparator.comparingInt(killCount::get));
+                for (Player citizen : citizens) {
+                    if (killCount.get(citizen) == 0) continue;
+                    player.sendMessage(ChatColor.BLUE + citizen.getDisplayName() + "(殺害数: " + killCount.get(citizen) + ")");
+                }
+                player.playSound(player.getLocation(), Sound.ENTITY_ENDERDRAGON_DEATH, 0.5F, 1);
+            }
         }
     }
 
@@ -192,7 +203,7 @@ public class GameState implements State, Listener, Runnable {
             if (ItemStackUtils.countItemStack(e.getPlayer().getInventory(), reviveItem) < 1) return;
             e.getPlayer().getInventory().removeItem(reviveItem);
             p.teleport(e.getPlayer().getLocation());
-            p.setGameMode(GameMode.SURVIVAL);
+            p.setGameMode(GameMode.ADVENTURE);
         });
     }
 
