@@ -1,9 +1,6 @@
 package net.toshimichi.invasion.commands;
 
-import net.toshimichi.invasion.GameState;
-import net.toshimichi.invasion.Holder;
-import net.toshimichi.invasion.PlayerGUI;
-import net.toshimichi.invasion.State;
+import net.toshimichi.invasion.*;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -31,9 +28,10 @@ public class StartCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        GameState state = new GameState(plugin, spawnLoc, tags, reviveItem, playerGUI);
-        holder.set(state);
-        state.enable();
+        GameState gameState = new GameState(plugin, spawnLoc, tags, reviveItem, playerGUI);
+        AwaitState awaitState = new AwaitState(plugin, holder, gameState, spawnLoc);
+        holder.set(awaitState);
+        awaitState.enable();
         return true;
     }
 }

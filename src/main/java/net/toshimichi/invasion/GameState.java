@@ -96,7 +96,6 @@ public class GameState implements State, Listener, Runnable {
             GameTeam team = new GameTeam(player, Character.toString(tags.charAt(tagCounter++)));
             teams.add(team);
             killCount.put(player, 0);
-            player.teleport(spawnLoc);
         }
         updateScoreboard();
     }
@@ -107,6 +106,7 @@ public class GameState implements State, Listener, Runnable {
         HandlerList.unregisterAll(this);
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+            player.teleport(spawnLoc);
         }
         if (task != null) {
             task.cancel();
