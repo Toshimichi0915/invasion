@@ -14,12 +14,10 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitTask;
@@ -129,7 +127,7 @@ public class GameState implements State, Listener, Runnable {
             Player closest = null;
             for (Player enemy : Bukkit.getOnlinePlayers()) {
                 GameTeam enemyTeam = getTeam(enemy);
-                if(ally.equals(enemyTeam)) continue;
+                if (ally.equals(enemyTeam)) continue;
                 double distance = player.getLocation().distanceSquared(enemy.getLocation());
                 if (distance < minDistance) {
                     minDistance = distance;
@@ -162,6 +160,14 @@ public class GameState implements State, Listener, Runnable {
                 }
                 player.playSound(player.getLocation(), Sound.ENTITY_ENDERDRAGON_DEATH, 0.5F, 1);
             }
+        }
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        PlayerInventory i = e.getPlayer().getInventory();
+        if (i.getChestplate().getType().equals(Material.ELYTRA)) {
+            i.setChestplate(null);
         }
     }
 

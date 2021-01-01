@@ -2,12 +2,15 @@ package net.toshimichi.invasion;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -31,7 +34,7 @@ public class AwaitState implements State, Listener, Runnable {
     public void enable() {
         Bukkit.getPluginManager().registerEvents(this, plugin);
         task = Bukkit.getScheduler().runTaskTimer(plugin, this, 0, 1);
-        for(Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             player.teleport(spawnLoc);
         }
     }
@@ -51,6 +54,9 @@ public class AwaitState implements State, Listener, Runnable {
                 Location loc = player.getLocation();
                 loc.add(0, -3, 0);
                 player.teleport(loc);
+                player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+                player.setFoodLevel(20);
+                player.getInventory().setChestplate(new ItemStack(Material.ELYTRA));
             }
             holder.set(nextState);
             nextState.enable();
