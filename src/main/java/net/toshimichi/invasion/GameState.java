@@ -2,6 +2,8 @@ package net.toshimichi.invasion;
 
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -16,6 +18,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.projectiles.ProjectileSource;
@@ -33,19 +36,23 @@ public class GameState implements State, Listener, Runnable {
     private final Random random = new Random();
     private final ArrayList<GameTeam> teams = new ArrayList<>();
     private final HashMap<Player, Integer> killCount = new HashMap<>();
+    private final HashSet<Location> openedChests = new HashSet<>();
     private final String tags;
     private final ItemStack reviveItem;
     private final PlayerGUI playerGUI;
+    private final Lottery<ItemStack> lottery;
+    private int counter;
     private int tagCounter = 0;
     private BukkitTask task;
 
-    public GameState(Plugin plugin, Location spawnLoc, String tags, ItemStack reviveItem, PlayerGUI playerGUI) {
+    public GameState(Plugin plugin, Location spawnLoc, String tags, ItemStack reviveItem, PlayerGUI playerGUI, Lottery<ItemStack> lottery) {
         this.plugin = plugin;
         this.tags = tags;
         this.spawnLoc = spawnLoc;
         this.reviveItem = reviveItem.clone();
         this.reviveItem.setAmount(1);
         this.playerGUI = playerGUI;
+        this.lottery = lottery;
     }
 
     private GameTeam getTeam(Player player) {
@@ -114,6 +121,14 @@ public class GameState implements State, Listener, Runnable {
 
     @Override
     public void run() {
+        counter++;
+        // 10分おきにチェスト更新
+        if (counter % (20 * 60 * 10) == 0) {
+            openedChests.clear();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.sendMessage(ChatColor.GREEN + "チェストにアイテムが補給されました");
+            }
+        }
         // ゲーム終了
         if (teams.size() == 1) {
             Bukkit.getScheduler().runTaskLater(plugin, this::disable, 100);
@@ -259,5 +274,19 @@ public class GameState implements State, Listener, Runnable {
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
         e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onOpen(PlayerInteractEvent e) {
+        Block block = e.getClickedBlock();
+        if (block == null) return;
+        if (block.getType() != Material.CHEST) return;
+        if (openedChests.contains(block.getLocation())) return;
+        openedChests.add(block.getLocation());
+        Inventory inventory = ((Chest) block.getState()).getBlockInventory();
+        int items = random.nextInt(27) + 1;
+        for(int i = 0; i < items; i++) {
+            inventory.addItem(lottery.draw());
+        }
     }
 }
