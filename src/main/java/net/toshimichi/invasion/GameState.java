@@ -37,17 +37,19 @@ public class GameState implements State, Listener, Runnable {
     private final ItemStack reviveItem;
     private final PlayerGUI playerGUI;
     private final Lottery<ItemStack> lottery;
+    private final int maxItems;
     private int counter;
     private int tagCounter = 0;
     private BukkitTask task;
 
-    public GameState(Plugin plugin, Location spawnLoc, String tags, ItemStack reviveItem, PlayerGUI playerGUI, Lottery<ItemStack> lottery) {
+    public GameState(Plugin plugin, Location spawnLoc, String tags, ItemStack reviveItem, PlayerGUI playerGUI, Lottery<ItemStack> lottery, int maxItems) {
         this.plugin = plugin;
         this.tags = tags;
         this.spawnLoc = spawnLoc;
         this.reviveItem = reviveItem.clone();
         this.reviveItem.setAmount(1);
         this.playerGUI = playerGUI;
+        this.maxItems = maxItems;
         this.lottery = lottery;
     }
 
@@ -298,7 +300,7 @@ public class GameState implements State, Listener, Runnable {
         openedChests.add(block.getLocation());
         Inventory inventory = ((Chest) block.getState()).getBlockInventory();
         inventory.clear();
-        int items = random.nextInt(5) + 1;
+        int items = random.nextInt(maxItems) + 1;
         for (int i = 0; i < items; i++) {
             inventory.setItem(random.nextInt(27), lottery.draw());
         }
