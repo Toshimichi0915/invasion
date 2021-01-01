@@ -284,6 +284,7 @@ public class GameState implements State, Listener, Runnable {
         if (openedChests.contains(block.getLocation())) return;
         openedChests.add(block.getLocation());
         Inventory inventory = ((Chest) block.getState()).getBlockInventory();
+        inventory.clear();
         int items = random.nextInt(27) + 1;
         for(int i = 0; i < items; i++) {
             inventory.addItem(lottery.draw());
