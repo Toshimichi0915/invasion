@@ -122,6 +122,24 @@ public class GameState implements State, Listener, Runnable {
     @Override
     public void run() {
         counter++;
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            GameTeam ally = getTeam(player);
+            if (ally == null) continue;
+            double minDistance = Double.MAX_VALUE;
+            Player closest = null;
+            for (Player enemy : Bukkit.getOnlinePlayers()) {
+                GameTeam enemyTeam = getTeam(enemy);
+                if(ally.equals(enemyTeam)) continue;
+                double distance = player.getLocation().distanceSquared(enemy.getLocation());
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closest = enemy;
+                }
+            }
+            if (closest != null) {
+                player.setCompassTarget(closest.getLocation());
+            }
+        }
         // 10分おきにチェスト更新
         if (counter % (20 * 60 * 10) == 0) {
             openedChests.clear();
@@ -286,7 +304,7 @@ public class GameState implements State, Listener, Runnable {
         Inventory inventory = ((Chest) block.getState()).getBlockInventory();
         inventory.clear();
         int items = random.nextInt(27) + 1;
-        for(int i = 0; i < items; i++) {
+        for (int i = 0; i < items; i++) {
             inventory.addItem(lottery.draw());
         }
     }
