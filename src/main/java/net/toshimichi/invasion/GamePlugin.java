@@ -6,10 +6,12 @@ import net.toshimichi.invasion.commands.StartCommand;
 import net.toshimichi.invasion.commands.StopCommand;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -93,6 +95,13 @@ public class GamePlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
         if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+        e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof Player)) return;
+        if (!((Player) e.getEntity()).getScoreboard().equals(Bukkit.getScoreboardManager().getMainScoreboard())) return;
         e.setCancelled(true);
     }
 }
