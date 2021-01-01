@@ -300,6 +300,12 @@ public class GameState implements State, Listener, Runnable {
         if (block == null) return;
         if (block.getType() != Material.CHEST) return;
         if (openedChests.contains(block.getLocation())) return;
+        GameTeam team = getTeam(e.getPlayer());
+        if (team == null || !team.getOwner().equals(e.getPlayer())) {
+            e.getPlayer().sendMessage(ChatColor.RED + "「王」のみがチェストを開けることができます");
+            e.setCancelled(true);
+            return;
+        }
         openedChests.add(block.getLocation());
         Inventory inventory = ((Chest) block.getState()).getBlockInventory();
         inventory.clear();
