@@ -47,14 +47,13 @@ public class GamePlugin extends JavaPlugin {
 
         PlayerGUI playerGUI = new PlayerGUI(this);
         playerGUI.enable();
-        ArrayList<Loot> loots = new ArrayList<>();
         ConfigurationSection section = getConfig().getConfigurationSection("lottery");
         if(section != null) {
             for (String key : section.getKeys(false)) {
                 Loot loot = new Loot();
                 HashMap<String, Object> map = new HashMap<>();
-                for (String key1 : section.getKeys(false)) {
-                    map.put(key, section.get(key1));
+                for (String key1 : section.getConfigurationSection(key).getKeys(false)) {
+                    map.put(key1, section.getConfigurationSection(key).get(key1));
                 }
                 loot.fromMap(map);
                 loots.add(loot);
