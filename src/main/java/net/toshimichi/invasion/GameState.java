@@ -166,6 +166,7 @@ public class GameState implements State, Listener, Runnable {
         PlayerInventory i = e.getPlayer().getInventory();
         if (i.getChestplate() == null) return;
         if (!i.getChestplate().getType().equals(Material.ELYTRA)) return;
+        if (!e.getPlayer().isOnGround()) return;
         i.setChestplate(null);
     }
 
@@ -297,9 +298,9 @@ public class GameState implements State, Listener, Runnable {
         openedChests.add(block.getLocation());
         Inventory inventory = ((Chest) block.getState()).getBlockInventory();
         inventory.clear();
-        int items = random.nextInt(27) + 1;
+        int items = random.nextInt(5) + 1;
         for (int i = 0; i < items; i++) {
-            inventory.addItem(lottery.draw());
+            inventory.setItem(random.nextInt(27), lottery.draw());
         }
     }
 }
