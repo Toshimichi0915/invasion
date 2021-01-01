@@ -180,6 +180,9 @@ public class GameState implements State, Listener, Runnable {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
+        ItemStack reviveItem = this.reviveItem.clone();
+        reviveItem.setAmount(1000);
+        e.getPlayer().getInventory().removeItem(reviveItem);
         e.getPlayer().damage(1000);
     }
 
