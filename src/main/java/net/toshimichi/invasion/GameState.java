@@ -3,11 +3,13 @@ package net.toshimichi.invasion;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -16,6 +18,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -49,6 +52,7 @@ public class GameState implements State, Listener, Runnable {
     }
 
     private GameTeam getTeam(Player player) {
+        if(player == null) return null;
         for (GameTeam team : teams) {
             if (team.getOwner().equals(player) || team.getCitizens().contains(player)) {
                 return team;
@@ -63,13 +67,6 @@ public class GameState implements State, Listener, Runnable {
             if (ally == null) continue;
             Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
             player.setScoreboard(scoreboard);
-
-            Team allyTeam = scoreboard.registerNewTeam(ally.getTag());
-            allyTeam.addEntry(ally.getOwner().getName());
-            for (Player citizen : ally.getCitizens()) {
-                allyTeam.addEntry(citizen.getName());
-            }
-            allyTeam.setAllowFriendlyFire(false);
 
             for (Player enemy : Bukkit.getOnlinePlayers()) {
                 GameTeam team = getTeam(enemy);
@@ -140,7 +137,7 @@ public class GameState implements State, Listener, Runnable {
         e.getPlayer().setGameMode(GameMode.SPECTATOR);
         GameTeam team = getTeam(e.getPlayer());
         if (team != null) {
-            Bukkit.getScheduler().runTaskLater(plugin, ()->e.getPlayer().teleport(team.getOwner()), 1);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> e.getPlayer().teleport(team.getOwner()), 1);
         }
     }
 
@@ -159,6 +156,24 @@ public class GameState implements State, Listener, Runnable {
         owner.getInventory().removeItem(reviveItem);
         owner.setHealth(owner.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
         owner.getLocation().getWorld().playSound(owner.getLocation(), Sound.ENTITY_BAT_DEATH, 0.5F, 0.5F);
+    }
+
+    @EventHandler
+    public void onDamageByEntity(EntityDamageByEntityEvent e) {
+        if (!(e.getEntity() instanceof Player)) return;
+        Player player = null;
+        if (e.getDamager() instanceof Player) {
+            player = (Player) e.getDamager();
+        } else if (e.getDamager() instanceof Projectile) {
+            ProjectileSource source = ((Projectile) e.getDamager()).getShooter();
+            if (source instanceof Player) {
+                player = (Player) source;
+            }
+        }
+        GameTeam attacker = getTeam(player);
+        GameTeam victim = getTeam((Player) e.getEntity());
+        if (attacker == null || !attacker.equals(victim)) return;
+        e.setDamage(0);
     }
 
     @EventHandler
