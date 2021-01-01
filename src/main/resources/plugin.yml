@@ -10,8 +10,14 @@ commands:
     usage: /istop
     description: ゲームを終了します
     permission: invasion.stop
+  irevive:
+    usage: /irevive
+    description: 蘇生アイテムを入手します
+    permission: invasion.revive
 permissions:
   invasion.start:
     permission: op
   invasion.stop:
+    permission: op
+  invasion.revive:
     permission: op

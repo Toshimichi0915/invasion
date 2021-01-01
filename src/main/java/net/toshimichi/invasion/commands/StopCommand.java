@@ -1,5 +1,7 @@
-package net.toshimichi.invasion;
+package net.toshimichi.invasion.commands;
 
+import net.toshimichi.invasion.Holder;
+import net.toshimichi.invasion.State;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

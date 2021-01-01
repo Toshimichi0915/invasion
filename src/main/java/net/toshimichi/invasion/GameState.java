@@ -1,19 +1,20 @@
 package net.toshimichi.invasion;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
@@ -21,7 +22,9 @@ import org.bukkit.scoreboard.Team;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class GameState implements State, Listener, Runnable {
 
@@ -31,13 +34,18 @@ public class GameState implements State, Listener, Runnable {
     private final ArrayList<GameTeam> teams = new ArrayList<>();
     private final HashMap<Player, Integer> killCount = new HashMap<>();
     private final String tags;
+    private final ItemStack reviveItem;
+    private final PlayerGUI playerGUI;
     private int tagCounter = 0;
     private BukkitTask task;
 
-    public GameState(Plugin plugin, Location spawnLoc, String tags) {
+    public GameState(Plugin plugin, Location spawnLoc, String tags, ItemStack reviveItem, PlayerGUI playerGUI) {
         this.plugin = plugin;
         this.tags = tags;
         this.spawnLoc = spawnLoc;
+        this.reviveItem = reviveItem.clone();
+        this.reviveItem.setAmount(1);
+        this.playerGUI = playerGUI;
     }
 
     private GameTeam getTeam(Player player) {
@@ -130,6 +138,47 @@ public class GameState implements State, Listener, Runnable {
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
         e.getPlayer().setGameMode(GameMode.SPECTATOR);
+        GameTeam team = getTeam(e.getPlayer());
+        if (team != null) {
+            Bukkit.getScheduler().runTaskLater(plugin, ()->e.getPlayer().teleport(team.getOwner()), 1);
+        }
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof Player)) return;
+        GameTeam team = getTeam((Player) e.getEntity());
+        if (team == null) return;
+        if (!team.getOwner().equals(e.getEntity())) return;
+        Player owner = team.getOwner();
+        if (owner.getHealth() - e.getFinalDamage() > 0) return;
+        ItemStack reviveItem = this.reviveItem.clone();
+        reviveItem.setAmount(2);
+        if (ItemStackUtils.countItemStack(owner.getInventory(), reviveItem) < reviveItem.getAmount()) return;
+        e.setDamage(0);
+        owner.getInventory().removeItem(reviveItem);
+        owner.setHealth(owner.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+        owner.getLocation().getWorld().playSound(owner.getLocation(), Sound.ENTITY_BAT_DEATH, 0.5F, 0.5F);
+    }
+
+    @EventHandler
+    public void onClick(PlayerInteractEvent e) {
+        GameTeam team = getTeam(e.getPlayer());
+        if (team == null) return;
+        if (!team.getOwner().equals(e.getPlayer())) return;
+        ItemStack mainHand = e.getPlayer().getInventory().getItemInMainHand();
+        if (!reviveItem.isSimilar(mainHand)) return;
+        List<Player> dead = team.getCitizens().stream()
+                .filter(Player::isValid)
+                .filter(p -> p.getGameMode().equals(GameMode.SPECTATOR))
+                .collect(Collectors.toList());
+        playerGUI.openGUI(e.getPlayer(), dead, (p) -> {
+            if (p == null) return;
+            if (ItemStackUtils.countItemStack(e.getPlayer().getInventory(), reviveItem) < 1) return;
+            e.getPlayer().getInventory().removeItem(reviveItem);
+            p.teleport(e.getPlayer().getLocation());
+            p.setGameMode(GameMode.SURVIVAL);
+        });
     }
 
     @EventHandler

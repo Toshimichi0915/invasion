@@ -1,6 +1,7 @@
 package net.toshimichi.invasion;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,14 +29,16 @@ public class PlayerGUI implements State, Listener {
 
     public void openGUI(Player player, List<Player> list, Consumer<Player> consumer) {
         Inventory inventory = Bukkit.createInventory(player, 54, "蘇生するプレイヤーを選択してください");
-        opened.put(player, new PlayerGUIData(player, list, consumer));
         for (Player option : list) {
             ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
             SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
+            meta.setDisplayName(ChatColor.RESET + option.getDisplayName());
             meta.setOwningPlayer(option);
             itemStack.setItemMeta(meta);
             inventory.addItem(itemStack);
         }
+        player.openInventory(inventory);
+        opened.put(player, new PlayerGUIData(player, list, consumer));
     }
 
     @Override
@@ -53,7 +56,7 @@ public class PlayerGUI implements State, Listener {
         PlayerGUIData data = opened.get(e.getWhoClicked());
         if (data == null) return;
         Consumer<Player> consumer = data.consumer;
-        if (e.getSlot() < 0 || e.getSlot() > data.list.size()) return;
+        if (e.getSlot() < 0 || e.getSlot() >= data.list.size()) return;
         e.setCancelled(true);
         e.getWhoClicked().closeInventory();
         opened.remove(e.getWhoClicked());
