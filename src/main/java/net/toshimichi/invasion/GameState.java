@@ -9,8 +9,6 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -166,9 +164,9 @@ public class GameState implements State, Listener, Runnable {
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         PlayerInventory i = e.getPlayer().getInventory();
-        if (i.getChestplate().getType().equals(Material.ELYTRA)) {
-            i.setChestplate(null);
-        }
+        if (i.getChestplate() == null) return;
+        if (!i.getChestplate().getType().equals(Material.ELYTRA)) return;
+        i.setChestplate(null);
     }
 
     @EventHandler
