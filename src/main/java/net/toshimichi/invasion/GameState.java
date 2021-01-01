@@ -291,16 +291,6 @@ public class GameState implements State, Listener, Runnable {
     }
 
     @EventHandler
-    public void onBreak(BlockBreakEvent e) {
-        e.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onPlace(BlockPlaceEvent e) {
-        e.setCancelled(true);
-    }
-
-    @EventHandler
     public void onOpen(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
         if (block == null) return;

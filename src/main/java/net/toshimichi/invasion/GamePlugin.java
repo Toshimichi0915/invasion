@@ -6,6 +6,10 @@ import net.toshimichi.invasion.commands.StartCommand;
 import net.toshimichi.invasion.commands.StopCommand;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -13,7 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class GamePlugin extends JavaPlugin {
+public class GamePlugin extends JavaPlugin implements Listener {
 
     private final Holder<State> gameHolder = new Holder<>();
     private final ArrayList<Loot> loots = new ArrayList<>();
@@ -48,7 +52,7 @@ public class GamePlugin extends JavaPlugin {
         PlayerGUI playerGUI = new PlayerGUI(this);
         playerGUI.enable();
         ConfigurationSection section = getConfig().getConfigurationSection("lottery");
-        if(section != null) {
+        if (section != null) {
             for (String key : section.getKeys(false)) {
                 Loot loot = new Loot();
                 HashMap<String, Object> map = new HashMap<>();
@@ -60,6 +64,7 @@ public class GamePlugin extends JavaPlugin {
             }
         }
         newLottery();
+        Bukkit.getPluginManager().registerEvents(this, this);
         getCommand("istart").setExecutor(new StartCommand(this, gameHolder, spawnLoc, getConfig().getString("tags"), new Holder<>(reviveItem), playerGUI, lottery));
         getCommand("istop").setExecutor(new StopCommand(gameHolder));
         getCommand("irevive").setExecutor(new ReviveCommand(reviveItem));
@@ -67,7 +72,7 @@ public class GamePlugin extends JavaPlugin {
             loots.add(l);
             newLottery();
             ConfigurationSection savedSection = getConfig().createSection("lottery");
-            for(int i = 0; i < loots.size(); i++) {
+            for (int i = 0; i < loots.size(); i++) {
                 savedSection.set(Integer.toString(i), loots.get(i).toMap());
             }
             saveConfig();
@@ -77,5 +82,17 @@ public class GamePlugin extends JavaPlugin {
     public void onDisable() {
         if (gameHolder.get() != null)
             gameHolder.get().disable();
+    }
+
+    @EventHandler
+    public void onBreak(BlockBreakEvent e) {
+        if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+        e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlace(BlockPlaceEvent e) {
+        if (e.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+        e.setCancelled(true);
     }
 }
