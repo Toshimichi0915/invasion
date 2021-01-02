@@ -120,24 +120,29 @@ public class GameState implements State, Listener, Runnable {
     @Override
     public void run() {
         counter++;
+        // コンパス
         for (Player player : Bukkit.getOnlinePlayers()) {
             GameTeam ally = getTeam(player);
             if (ally == null) continue;
-            double minDistance = Double.MAX_VALUE;
-            Player closest = null;
-            for (Player enemy : Bukkit.getOnlinePlayers()) {
-                GameTeam enemyTeam = getTeam(enemy);
-                if (enemy.isDead()) continue;
-                if (enemyTeam == null) continue;
-                if (ally.equals(enemyTeam)) continue;
-                double distance = player.getLocation().distanceSquared(enemy.getLocation());
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closest = enemy;
+            if (ally.getOwner().equals(player)) {
+                double minDistance = Double.MAX_VALUE;
+                Player closest = null;
+                for (Player enemy : Bukkit.getOnlinePlayers()) {
+                    GameTeam enemyTeam = getTeam(enemy);
+                    if (enemy.isDead()) continue;
+                    if (enemyTeam == null) continue;
+                    if (ally.equals(enemyTeam)) continue;
+                    double distance = player.getLocation().distanceSquared(enemy.getLocation());
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closest = enemy;
+                    }
                 }
-            }
-            if (closest != null) {
-                player.setCompassTarget(closest.getLocation());
+                if (closest != null) {
+                    player.setCompassTarget(closest.getLocation());
+                }
+            } else {
+                player.setCompassTarget(ally.getOwner().getLocation());
             }
         }
         // 10分おきにチェスト更新
