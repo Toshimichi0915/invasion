@@ -127,6 +127,8 @@ public class GameState implements State, Listener, Runnable {
             Player closest = null;
             for (Player enemy : Bukkit.getOnlinePlayers()) {
                 GameTeam enemyTeam = getTeam(enemy);
+                if (enemy.isDead()) continue;
+                if (enemyTeam == null) continue;
                 if (ally.equals(enemyTeam)) continue;
                 double distance = player.getLocation().distanceSquared(enemy.getLocation());
                 if (distance < minDistance) {
@@ -169,6 +171,7 @@ public class GameState implements State, Listener, Runnable {
         if (i.getChestplate() == null) return;
         if (!i.getChestplate().getType().equals(Material.ELYTRA)) return;
         if (!e.getPlayer().isOnGround()) return;
+        e.getPlayer().setFallDistance(0);
         i.setChestplate(null);
     }
 
@@ -262,6 +265,7 @@ public class GameState implements State, Listener, Runnable {
             他殺: 殺害者にチーム全体を譲渡
         チームの市民が死亡: 殺害者のチームに移動
          */
+        if (victimTeam == null) return;
         if (victimTeam.getOwner().equals(e.getEntity())) { // 所有者が死んだ場合
             if (killerTeam == null) { // 自然死の場合
                 Player bestKiller = null;
