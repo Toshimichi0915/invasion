@@ -236,7 +236,7 @@ public class GameState implements State, Listener, Runnable {
         GameTeam victim = getTeam((Player) e.getEntity());
         if (attacker == null || !attacker.equals(victim)) return;
         e.setDamage(0);
-        if(e.getDamager() instanceof Player) {
+        if (e.getDamager() instanceof Player) {
             ((Player) e.getDamager()).playSound(e.getDamager().getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0.3F);
         }
     }
@@ -266,6 +266,7 @@ public class GameState implements State, Listener, Runnable {
         GameTeam victimTeam = getTeam(e.getEntity());
         GameTeam killerTeam = getTeam(e.getEntity().getKiller());
         killCount.put(e.getEntity(), 0);
+        killCount.put(e.getEntity().getKiller(), killCount.getOrDefault(e.getEntity().getKiller(), 0) + 1);
 
         /*
         チームの所有者が死亡:
