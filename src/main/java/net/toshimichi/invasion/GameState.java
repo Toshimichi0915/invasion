@@ -4,6 +4,8 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -96,6 +98,11 @@ public class GameState implements State, Listener, Runnable {
         task = Bukkit.getScheduler().runTaskTimer(plugin, this, 0, 1);
         for (Player player : Bukkit.getOnlinePlayers()) {
             GameTeam team = new GameTeam(player, Character.toString(tags.charAt(tagCounter++)));
+            for (Entity e : spawnLoc.getWorld().getEntities()) {
+                if (e instanceof Item) {
+                    e.remove();
+                }
+            }
             player.setGameMode(GameMode.ADVENTURE);
             teams.add(team);
             killCount.put(player, 0);
