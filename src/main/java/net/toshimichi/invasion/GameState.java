@@ -163,7 +163,7 @@ public class GameState implements State, Listener, Runnable {
                 citizens.sort(Comparator.comparingInt(killCount::get));
                 for (Player citizen : citizens) {
                     if (killCount.get(citizen) == 0) continue;
-                    player.sendMessage(ChatColor.BLUE + citizen.getDisplayName() + "(殺害数: " + killCount.get(citizen) + ")");
+                    player.sendMessage(ChatColor.YELLOW + citizen.getDisplayName() + ChatColor.GRAY + "(殺害数: " + killCount.get(citizen) + ")");
                 }
                 player.playSound(player.getLocation(), Sound.ENTITY_ENDERDRAGON_DEATH, 0.5F, 1);
             }
