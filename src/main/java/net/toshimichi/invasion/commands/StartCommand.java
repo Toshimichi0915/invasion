@@ -18,8 +18,11 @@ public class StartCommand implements CommandExecutor {
     private final PlayerGUI playerGUI;
     private final Holder<Lottery<ItemStack>> lottery;
     private final int maxItems;
+    private final int border;
+    private final double borderSpeed;
 
-    public StartCommand(Plugin plugin, Holder<State> holder, Location spawnLoc, String tags, ItemStack reviveItem, PlayerGUI playerGUI, Holder<Lottery<ItemStack>> lottery, int maxItems) {
+    public StartCommand(Plugin plugin, Holder<State> holder, Location spawnLoc, String tags, ItemStack reviveItem,
+                        PlayerGUI playerGUI, Holder<Lottery<ItemStack>> lottery, int maxItems, int border, double borderSpeed) {
         this.plugin = plugin;
         this.holder = holder;
         this.spawnLoc = spawnLoc;
@@ -28,11 +31,13 @@ public class StartCommand implements CommandExecutor {
         this.playerGUI = playerGUI;
         this.lottery = lottery;
         this.maxItems = maxItems;
+        this.border = border;
+        this.borderSpeed = borderSpeed;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        GameState gameState = new GameState(plugin, spawnLoc, tags, reviveItem, playerGUI, lottery.get(), maxItems);
+        GameState gameState = new GameState(plugin, spawnLoc, tags, reviveItem, playerGUI, lottery.get(), maxItems, border, borderSpeed);
         AwaitState awaitState = new AwaitState(plugin, holder, gameState, spawnLoc);
         holder.set(awaitState);
         awaitState.enable();

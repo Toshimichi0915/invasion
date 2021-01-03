@@ -40,19 +40,24 @@ public class GameState implements State, Listener, Runnable {
     private final PlayerGUI playerGUI;
     private final Lottery<ItemStack> lottery;
     private final int maxItems;
+    private double border;
+    private final double borderSpeed;
     private int counter;
     private int tagCounter = 0;
     private BukkitTask task;
 
-    public GameState(Plugin plugin, Location spawnLoc, String tags, ItemStack reviveItem, PlayerGUI playerGUI, Lottery<ItemStack> lottery, int maxItems) {
+    public GameState(Plugin plugin, Location spawnLoc, String tags, ItemStack reviveItem, PlayerGUI playerGUI,
+                     Lottery<ItemStack> lottery, int maxItems, int border, double borderSpeed) {
         this.plugin = plugin;
         this.tags = tags;
         this.spawnLoc = spawnLoc;
         this.reviveItem = reviveItem.clone();
         this.reviveItem.setAmount(1);
         this.playerGUI = playerGUI;
-        this.maxItems = maxItems;
         this.lottery = lottery;
+        this.maxItems = maxItems;
+        this.border = border;
+        this.borderSpeed = borderSpeed;
     }
 
     private GameTeam getTeam(Player player) {
@@ -127,6 +132,14 @@ public class GameState implements State, Listener, Runnable {
     @Override
     public void run() {
         counter++;
+        border -= borderSpeed;
+        // ボーダー
+        WorldBorder worldBorder = spawnLoc.getWorld().getWorldBorder();
+        worldBorder.setCenter(spawnLoc);
+        worldBorder.setDamageAmount(2);
+        worldBorder.setDamageBuffer(0);
+        worldBorder.setSize(border);
+
         // コンパス
         for (Player player : Bukkit.getOnlinePlayers()) {
             GameTeam ally = getTeam(player);
