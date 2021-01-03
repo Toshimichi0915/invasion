@@ -301,7 +301,8 @@ public class GameState implements State, Listener, Runnable {
                 int mostKills = 0;
                 for (Player player : victimTeam.getCitizens()) {
                     int kills = killCount.get(player);
-                    if (kills < mostKills) continue;
+                    if (kills <= mostKills) continue;
+                    if (player.equals(e.getEntity()) || player.getGameMode() != GameMode.SURVIVAL) continue;
                     bestKiller = player;
                     mostKills = kills;
                 }
