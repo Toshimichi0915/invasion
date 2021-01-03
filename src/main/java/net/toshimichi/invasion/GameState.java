@@ -35,6 +35,7 @@ public class GameState implements State, Listener, Runnable {
     private final ArrayList<GameTeam> teams = new ArrayList<>();
     private final HashMap<Player, Integer> killCount = new HashMap<>();
     private final HashSet<Location> openedChests = new HashSet<>();
+    private final HashSet<Player> hitByFriend = new HashSet<>();
     private final String tags;
     private final ItemStack reviveItem;
     private final PlayerGUI playerGUI;
@@ -135,6 +136,7 @@ public class GameState implements State, Listener, Runnable {
     public void run() {
         counter++;
         border -= borderSpeed;
+        hitByFriend.clear();
         // ボーダー
         WorldBorder worldBorder = spawnLoc.getWorld().getWorldBorder();
         worldBorder.setCenter(spawnLoc);
@@ -258,8 +260,16 @@ public class GameState implements State, Listener, Runnable {
         GameTeam victim = getTeam((Player) e.getEntity());
         if (attacker == null || !attacker.equals(victim)) return;
         e.setDamage(0);
+        hitByFriend.add((Player) e.getEntity());
         if (e.getDamager() instanceof Player) {
             ((Player) e.getDamager()).playSound(e.getDamager().getLocation(), Sound.BLOCK_NOTE_BASS, 1, 0.3F);
+        }
+    }
+
+    @EventHandler
+    public void onConsume(PlayerItemDamageEvent e) {
+        if (hitByFriend.contains(e.getPlayer())) {
+            e.setCancelled(true);
         }
     }
 
