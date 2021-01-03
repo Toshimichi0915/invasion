@@ -1,5 +1,6 @@
 package net.toshimichi.invasion;
 
+import org.apache.commons.lang.math.RandomUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -11,6 +12,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 
@@ -37,6 +39,11 @@ public class PlayerGUI implements State, Listener {
             itemStack.setItemMeta(meta);
             inventory.addItem(itemStack);
         }
+        ItemStack random = new ItemStack(Material.BOW, 1);
+        ItemMeta meta = random.getItemMeta();
+        meta.setDisplayName(ChatColor.RESET + "ランダムで蘇生させる");
+        random.setItemMeta(meta);
+        inventory.setItem(53, random);
         player.openInventory(inventory);
         opened.put(player, new PlayerGUIData(player, list, consumer));
     }
@@ -56,11 +63,17 @@ public class PlayerGUI implements State, Listener {
         PlayerGUIData data = opened.get(e.getWhoClicked());
         if (data == null) return;
         Consumer<Player> consumer = data.consumer;
-        if (e.getSlot() < 0 || e.getSlot() >= data.list.size()) return;
+        Player selected;
+        if (e.getSlot() == 53 && !data.list.isEmpty()) {
+            selected = data.list.get(RandomUtils.nextInt(data.list.size()));
+        } else if (e.getSlot() >= 0 && e.getSlot() < data.list.size()) {
+            selected = data.list.get(e.getSlot());
+        } else {
+            return;
+        }
         e.setCancelled(true);
         e.getWhoClicked().closeInventory();
         opened.remove(e.getWhoClicked());
-        Player selected = data.list.get(e.getSlot());
         consumer.accept(selected);
     }
 
