@@ -220,10 +220,12 @@ public class GameState implements State, Listener, Runnable {
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
-        e.getPlayer().setGameMode(GameMode.SPECTATOR);
         GameTeam team = getTeam(e.getPlayer());
         if (team != null) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> e.getPlayer().teleport(team.getOwner()), 1);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                e.getPlayer().setGameMode(GameMode.SPECTATOR);
+                e.getPlayer().teleport(team.getOwner());
+            }, 1);
         }
     }
 
