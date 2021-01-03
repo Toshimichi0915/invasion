@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -86,6 +87,11 @@ public class GamePlugin extends JavaPlugin implements Listener {
     public void onDisable() {
         if (gameHolder.get() != null)
             gameHolder.get().disable();
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent e) {
+        Bukkit.getScheduler().runTaskLater(this, () -> e.getEntity().spigot().respawn(), 1);
     }
 
     @EventHandler
