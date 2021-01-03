@@ -127,6 +127,7 @@ public class GameState implements State, Listener, Runnable {
         if (task != null) {
             task.cancel();
         }
+        spawnLoc.getWorld().getWorldBorder().reset();
     }
 
     @Override
@@ -136,8 +137,8 @@ public class GameState implements State, Listener, Runnable {
         // ボーダー
         WorldBorder worldBorder = spawnLoc.getWorld().getWorldBorder();
         worldBorder.setCenter(spawnLoc);
-        worldBorder.setDamageAmount(2);
-        worldBorder.setDamageBuffer(0);
+        worldBorder.setDamageAmount(0.5);
+        worldBorder.setDamageBuffer(3);
         worldBorder.setSize(border);
 
         // コンパス
