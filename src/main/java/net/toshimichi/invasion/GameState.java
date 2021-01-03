@@ -101,14 +101,15 @@ public class GameState implements State, Listener, Runnable {
         System.out.println("ゲームが開始しました");
         Bukkit.getPluginManager().registerEvents(this, plugin);
         task = Bukkit.getScheduler().runTaskTimer(plugin, this, 0, 1);
+        for (Entity e : spawnLoc.getWorld().getEntities()) {
+            if (e instanceof Item) {
+                e.remove();
+            }
+        }
         for (Player player : Bukkit.getOnlinePlayers()) {
             GameTeam team = new GameTeam(player, Character.toString(tags.charAt(tagCounter++)));
-            for (Entity e : spawnLoc.getWorld().getEntities()) {
-                if (e instanceof Item) {
-                    e.remove();
-                }
-            }
             player.setGameMode(GameMode.ADVENTURE);
+            player.getActivePotionEffects().forEach(p -> player.removePotionEffect(p.getType()));
             teams.add(team);
             killCount.put(player, 0);
         }
