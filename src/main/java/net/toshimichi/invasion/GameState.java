@@ -139,8 +139,12 @@ public class GameState implements State, Listener, Runnable {
     }
 
     private boolean isInRange(double rad1, double rad2, double target) {
-        if(target < 0)
+        if (target < 0)
             target += 2 * Math.PI;
+        if (rad1 < 0)
+            rad1 += 2 * Math.PI;
+        if (rad2 < 0)
+            rad2 += 2 * Math.PI;
         if (rad1 <= rad2)
             return target >= rad1 && target <= rad2;
         else
