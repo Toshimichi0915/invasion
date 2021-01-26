@@ -57,6 +57,7 @@ public class AwaitState implements State, Listener, Runnable {
                 player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
                 player.setFoodLevel(20);
                 player.getInventory().clear();
+                player.setItemOnCursor(null);
                 player.getInventory().setChestplate(new ItemStack(Material.ELYTRA));
             }
             holder.set(nextState);

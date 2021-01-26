@@ -1,5 +1,7 @@
 package net.toshimichi.invasion;
 
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
@@ -23,11 +25,15 @@ import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class GameState implements State, Listener, Runnable {
+
+    private static final char[] signs = {'↑', '↗', '→', '↘', '↓', '↙', '←', '↖'};
+    private static final double radSize = 2 * Math.PI / signs.length;
 
     private final Plugin plugin;
     private final Location spawnLoc;
@@ -132,17 +138,47 @@ public class GameState implements State, Listener, Runnable {
         spawnLoc.getWorld().getWorldBorder().reset();
     }
 
+    private boolean isInRange(double rad1, double rad2, double target) {
+        if(target < 0)
+            target += 2 * Math.PI;
+        if (rad1 <= rad2)
+            return target >= rad1 && target <= rad2;
+        else
+            return target >= rad1 || target <= rad2;
+    }
+
     @Override
     public void run() {
         counter++;
         border -= borderSpeed;
         hitByFriend.clear();
+
         // ボーダー
         WorldBorder worldBorder = spawnLoc.getWorld().getWorldBorder();
         worldBorder.setCenter(spawnLoc);
         worldBorder.setDamageAmount(0.5);
         worldBorder.setDamageBuffer(3);
         worldBorder.setSize(border);
+
+        // アクションバー
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            GameTeam ally = getTeam(player);
+            if (ally == null || ally.getOwner().equals(player)) continue;
+            Player owner = ally.getOwner();
+            Vector v1 = player.getLocation().getDirection();
+            Vector v2 = owner.getLocation().toVector().subtract(player.getLocation().toVector()).normalize();
+            double rad = Math.atan2(v1.getX() * v2.getZ() - v2.getX() * v1.getZ(), v1.getX() * v2.getX() + v1.getZ() * v2.getZ());
+            char sign = ' ';
+            for (int i = 0; i < signs.length; i++) {
+                double startRad = -radSize / 2 + radSize * i;
+                double endRad = startRad + radSize;
+                if (!isInRange(startRad, endRad, rad)) continue;
+                sign = signs[i];
+                break;
+            }
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GOLD + owner.getDisplayName() +
+                    "(TOP) " + ChatColor.RED + ChatColor.BOLD + sign));
+        }
 
         // コンパス
         for (Player player : Bukkit.getOnlinePlayers()) {
