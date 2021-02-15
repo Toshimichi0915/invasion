@@ -130,6 +130,8 @@ public class GameState implements State, Listener, Runnable {
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
             player.teleport(spawnLoc);
+            player.getInventory().clear();
+            player.setItemOnCursor(null);
             player.setGameMode(GameMode.ADVENTURE);
         }
         if (task != null) {
