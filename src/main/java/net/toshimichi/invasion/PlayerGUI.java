@@ -31,13 +31,28 @@ public class PlayerGUI implements State, Listener {
 
     public void openGUI(Player player, List<Player> list, Consumer<Player> consumer) {
         Inventory inventory = Bukkit.createInventory(player, 54, "蘇生するプレイヤーを選択してください");
+        int counter = 0;
         for (Player option : list) {
-            ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-            SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
+            ItemStack placeholder = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+            SkullMeta meta = (SkullMeta) placeholder.getItemMeta();
             meta.setDisplayName(ChatColor.RESET + option.getDisplayName());
-            meta.setOwningPlayer(option);
-            itemStack.setItemMeta(meta);
-            inventory.addItem(itemStack);
+            placeholder.setItemMeta(meta);
+            inventory.setItem(counter++, placeholder);
+        }
+        counter = 0;
+        for (Player option : list) {
+            int slot = counter;
+            Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
+                ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+                SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
+                meta.setDisplayName(ChatColor.RESET + option.getDisplayName());
+                meta.setOwningPlayer(option);
+                itemStack.setItemMeta(meta);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    inventory.setItem(slot, itemStack);
+                });
+            }, 1);
+            counter++;
         }
         ItemStack random = new ItemStack(Material.BOW, 1);
         ItemMeta meta = random.getItemMeta();
