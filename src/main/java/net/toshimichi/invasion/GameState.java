@@ -382,6 +382,7 @@ public class GameState implements State, Listener, Runnable {
                     victimTeam.setOwner(bestKiller);
                     victimTeam.addCitizen(e.getEntity());
                 }
+                e.setDeathMessage(ChatColor.GRAY + e.getEntity().getName() + "は死亡した");
             } else { //他殺の場合
                 teams.remove(victimTeam);
                 // 勝利者のチームに加える
@@ -389,10 +390,12 @@ public class GameState implements State, Listener, Runnable {
                 for (Player player : victimTeam.getCitizens()) {
                     killerTeam.addCitizen(player);
                 }
+                e.setDeathMessage(ChatColor.GRAY + e.getEntity().getName() + "(LEADER)は" + e.getEntity().getKiller().getName() + "に殺された");
             }
         } else if (killerTeam != null) { // 市民が他殺された場合
             victimTeam.removeCitizen(e.getEntity());
             killerTeam.addCitizen(e.getEntity());
+            e.setDeathMessage(ChatColor.GRAY + e.getEntity().getName() + "(CITIZEN)は" + e.getEntity().getKiller().getName() + "に殺された");
         }
         updateScoreboard();
     }
