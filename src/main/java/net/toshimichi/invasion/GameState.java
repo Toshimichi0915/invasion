@@ -38,6 +38,7 @@ public class GameState implements State, Listener, Runnable {
     private final Plugin plugin;
     private final Location spawnLoc;
     private final Random random = new Random();
+    private final HashMap<Player, String> oldTeams = new HashMap<>();
     private final ArrayList<GameTeam> teams = new ArrayList<>();
     private final HashMap<Player, Integer> killCount = new HashMap<>();
     private final HashSet<Location> openedChests = new HashSet<>();
@@ -117,6 +118,7 @@ public class GameState implements State, Listener, Runnable {
             GameTeam team = new GameTeam(player, Character.toString(tags.charAt(tagCounter++)));
             player.setGameMode(GameMode.ADVENTURE);
             player.getActivePotionEffects().forEach(p -> player.removePotionEffect(p.getType()));
+            oldTeams.put(player, team.getName());
             teams.add(team);
             killCount.put(player, 0);
         }
@@ -165,6 +167,17 @@ public class GameState implements State, Listener, Runnable {
         worldBorder.setDamageAmount(0.5);
         worldBorder.setDamageBuffer(3);
         worldBorder.setSize(border);
+
+        // チーム移籍
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            GameTeam current = getTeam(player);
+            String oldTeamName = oldTeams.get(player);
+            if (current == null) continue;
+            if (oldTeamName == null) continue;
+            if (current.getName().equals(oldTeams.get(player))) continue;
+            player.sendMessage(ChatColor.GOLD + "あなたは " + ChatColor.GREEN + current.getName() + ChatColor.GOLD + " の市民になりました");
+            oldTeams.put(player, current.getName());
+        }
 
         // アクションバー
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -412,7 +425,7 @@ public class GameState implements State, Listener, Runnable {
         e.getRecipients().add(team.getOwner());
         e.getRecipients().addAll(team.getCitizens());
         StringBuilder builder = new StringBuilder();
-        if(team.getOwner().equals(e.getPlayer()))
+        if (team.getOwner().equals(e.getPlayer()))
             builder.append(ChatColor.GOLD).append("[LEADER]");
         else
             builder.append(ChatColor.GRAY).append("[CITIZEN]");
