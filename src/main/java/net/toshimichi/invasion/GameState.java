@@ -407,7 +407,7 @@ public class GameState implements State, Listener, Runnable {
 
     @EventHandler
     public void onChat(PlayerChatEvent e) {
-        net.toshimichi.invasion.Team team = getTeam(e.getPlayer());
+        GameTeam team = getTeam(e.getPlayer());
         e.getRecipients().clear();
         e.getRecipients().add(team.getOwner());
         e.getRecipients().addAll(team.getCitizens());
