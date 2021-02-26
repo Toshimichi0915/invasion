@@ -404,4 +404,19 @@ public class GameState implements State, Listener, Runnable {
             inventory.setItem(random.nextInt(27), lottery.draw());
         }
     }
+
+    @EventHandler
+    public void onChat(PlayerChatEvent e) {
+        net.toshimichi.invasion.Team team = getTeam(e.getPlayer());
+        e.getRecipients().clear();
+        e.getRecipients().add(team.getOwner());
+        e.getRecipients().addAll(team.getCitizens());
+        StringBuilder builder = new StringBuilder();
+        if(team.getOwner().equals(e.getPlayer()))
+            builder.append(ChatColor.GOLD).append("[LEADER]");
+        else
+            builder.append(ChatColor.GRAY).append("[CITIZEN]");
+        builder.append(ChatColor.GREEN).append("<%1$s>").append(ChatColor.WHITE).append(" %2$s");
+        e.setFormat(builder.toString());
+    }
 }
