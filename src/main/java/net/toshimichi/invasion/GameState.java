@@ -97,7 +97,7 @@ public class GameState implements State, Listener, Runnable {
                 Team enemyTeam = scoreboard.registerNewTeam(enemy.getName());
                 enemyTeam.setPrefix(color + "[" + team.getTag() + "] ");
                 if (team.getOwner().equals(enemy)) {
-                    enemyTeam.setSuffix(" (TOP)");
+                    enemyTeam.setSuffix(ChatColor.GOLD + " (TOP)");
                 }
                 enemyTeam.addEntry(enemy.getName());
             }
