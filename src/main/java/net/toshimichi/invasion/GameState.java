@@ -240,6 +240,7 @@ public class GameState implements State, Listener, Runnable {
                 player.sendMessage(ChatColor.GOLD + winner.getName() + "の勝利");
                 List<Player> citizens = winner.getCitizens();
                 citizens.sort(Comparator.comparingInt(killCount::get));
+                Collections.reverse(citizens);
                 for (Player citizen : citizens) {
                     if (killCount.get(citizen) == 0) continue;
                     player.sendMessage(ChatColor.YELLOW + citizen.getDisplayName() + ChatColor.GRAY + "(殺害数: " + killCount.get(citizen) + ")");
