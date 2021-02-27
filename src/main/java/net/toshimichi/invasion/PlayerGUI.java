@@ -46,7 +46,7 @@ public class PlayerGUI implements State, Listener {
                 ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
                 SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
                 meta.setDisplayName(ChatColor.RESET + option.getDisplayName());
-                meta.setOwningPlayer(option);
+//                meta.setOwningPlayer(option);
                 itemStack.setItemMeta(meta);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     inventory.setItem(slot, itemStack);
