@@ -68,9 +68,17 @@ public class GamePlugin extends JavaPlugin implements Listener {
         }
         newLottery();
         Bukkit.getPluginManager().registerEvents(this, this);
+        ArrayList<Border> borders = new ArrayList<>();
+        for (String key : getConfig().getConfigurationSection("border").getKeys(false)) {
+            Border border = new Border(Integer.parseInt(key),
+                    Integer.parseInt(getConfig().getString("border." + key + ".peace")),
+                    Double.parseDouble(getConfig().getString("border." + key + ".to")),
+                    Integer.parseInt(getConfig().getString("border." + key + ".time")));
+            borders.add(border);
+        }
         getCommand("istart").setExecutor(new StartCommand(this, gameHolder, spawnLoc,
                 getConfig().getString("tags"), reviveItem, playerGUI, lottery, getConfig().getInt("maxItems"),
-                getConfig().getInt("border"), getConfig().getDouble("borderSpeed")));
+                getConfig().getInt("borderRange"), borders));
         getCommand("istop").setExecutor(new StopCommand(gameHolder));
         getCommand("irevive").setExecutor(new ReviveCommand(reviveItem));
         getCommand("iloot").setExecutor(new LootCommand(l -> {

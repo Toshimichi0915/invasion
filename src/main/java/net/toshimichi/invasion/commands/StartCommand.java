@@ -8,6 +8,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
+import java.util.List;
+
 public class StartCommand implements CommandExecutor {
 
     private final Plugin plugin;
@@ -18,11 +20,11 @@ public class StartCommand implements CommandExecutor {
     private final PlayerGUI playerGUI;
     private final Holder<Lottery<ItemStack>> lottery;
     private final int maxItems;
-    private final int border;
-    private final double borderSpeed;
+    private final int borderRange;
+    private final List<Border> border;
 
     public StartCommand(Plugin plugin, Holder<State> holder, Location spawnLoc, String tags, ItemStack reviveItem,
-                        PlayerGUI playerGUI, Holder<Lottery<ItemStack>> lottery, int maxItems, int border, double borderSpeed) {
+                        PlayerGUI playerGUI, Holder<Lottery<ItemStack>> lottery, int maxItems, int borderRange, List<Border> border) {
         this.plugin = plugin;
         this.holder = holder;
         this.spawnLoc = spawnLoc;
@@ -31,13 +33,13 @@ public class StartCommand implements CommandExecutor {
         this.playerGUI = playerGUI;
         this.lottery = lottery;
         this.maxItems = maxItems;
+        this.borderRange = borderRange;
         this.border = border;
-        this.borderSpeed = borderSpeed;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        GameState gameState = new GameState(plugin, spawnLoc, tags, reviveItem, playerGUI, lottery.get(), maxItems, border, borderSpeed);
+        GameState gameState = new GameState(plugin, spawnLoc, tags, reviveItem, playerGUI, lottery.get(), maxItems, borderRange, border);
         AwaitState awaitState = new AwaitState(plugin, holder, gameState, spawnLoc);
         holder.set(awaitState);
         awaitState.enable();

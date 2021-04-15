@@ -1,7 +1,20 @@
 tags: ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよわをん
 maxItems: 10
-border: 500
-borderSpeed: 0.02
+borderRange: 500
+border:
+  1:
+    to: 0.2
+    peace: 200
+    time: 200
+  2:
+    to: 0.6
+    peace: 300
+    time: 200
+  3:
+    to: 0.9
+    peace: 300
+    time: 200
+
 spawn:
   world: world
   x: 1000

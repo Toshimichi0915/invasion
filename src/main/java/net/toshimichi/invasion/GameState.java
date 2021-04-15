@@ -48,14 +48,15 @@ public class GameState implements State, Listener, Runnable {
     private final PlayerGUI playerGUI;
     private final Lottery<ItemStack> lottery;
     private final int maxItems;
-    private double border;
-    private final double borderSpeed;
+    private final double borderRange;
+    private boolean prevPeaceful = true;
+    private ArrayList<Border> border;
     private int counter;
     private int tagCounter = 0;
     private BukkitTask task;
 
     public GameState(Plugin plugin, Location spawnLoc, String tags, ItemStack reviveItem, PlayerGUI playerGUI,
-                     Lottery<ItemStack> lottery, int maxItems, int border, double borderSpeed) {
+                     Lottery<ItemStack> lottery, int maxItems, int borderRange, List<Border> border) {
         this.plugin = plugin;
         this.tags = tags;
         this.spawnLoc = spawnLoc;
@@ -64,8 +65,8 @@ public class GameState implements State, Listener, Runnable {
         this.playerGUI = playerGUI;
         this.lottery = lottery;
         this.maxItems = maxItems;
-        this.border = border;
-        this.borderSpeed = borderSpeed;
+        this.borderRange = borderRange;
+        this.border = new ArrayList<>(border);
     }
 
     private GameTeam getTeam(Player player) {
@@ -123,6 +124,14 @@ public class GameState implements State, Listener, Runnable {
             killCount.put(player, 0);
         }
         updateScoreboard();
+
+        WorldBorder worldBorder = spawnLoc.getWorld().getWorldBorder();
+        worldBorder.setCenter(spawnLoc);
+        worldBorder.setDamageAmount(0.5);
+        worldBorder.setDamageBuffer(3);
+        worldBorder.setSize(borderRange);
+
+        border.sort(Comparator.comparingInt(Border::getPhase));
     }
 
     @Override
@@ -158,15 +167,41 @@ public class GameState implements State, Listener, Runnable {
     @Override
     public void run() {
         counter++;
-        border -= borderSpeed;
         hitByFriend.clear();
 
         // ボーダー
-        WorldBorder worldBorder = spawnLoc.getWorld().getWorldBorder();
-        worldBorder.setCenter(spawnLoc);
-        worldBorder.setDamageAmount(0.5);
-        worldBorder.setDamageBuffer(3);
-        worldBorder.setSize(border);
+        int totalTime = 0;
+        for (int i = 0; i < border.size(); i++) {
+            totalTime += border.get(i).getPeace();
+            if (i == border.size() - 1 && totalTime + border.get(i).getTime() < counter / 20 && !prevPeaceful) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendMessage(ChatColor.GOLD + "最後の収束が終了しました");
+                }
+                prevPeaceful = true;
+            }
+            if (totalTime - border.get(i).getPeace() < counter / 20 && counter / 20 < totalTime && !prevPeaceful) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendMessage(ChatColor.GOLD + "第" + i + "回目の収束が終了しました");
+                }
+                prevPeaceful = true;
+            }
+            totalTime += border.get(i).getTime();
+            if (totalTime - border.get(i).getTime() < counter / 20 && counter / 20 < totalTime) {
+                if (prevPeaceful) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        player.playSound(player.getLocation(), Sound.BLOCK_END_PORTAL_SPAWN, 1f, 1f);
+                        player.sendMessage(ChatColor.GOLD + "第" + (i + 1) + "回目の収束が始まります");
+                    }
+                    prevPeaceful = false;
+                }
+                double deltaTime = ((double) counter / 20 - totalTime + border.get(i).getTime()) / border.get(i).getTime();
+                double startBorder = border.isEmpty() || i == 0 ? 0 : border.get(i - 1).getTo();
+                double currentBorder = (border.get(i).getTo() - startBorder) * deltaTime + startBorder;
+
+                WorldBorder worldBorder = spawnLoc.getWorld().getWorldBorder();
+                worldBorder.setSize(borderRange - borderRange * currentBorder);
+            }
+        }
 
         // チーム移籍
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -242,7 +277,6 @@ public class GameState implements State, Listener, Runnable {
                 citizens.sort(Comparator.comparingInt(killCount::get));
                 Collections.reverse(citizens);
                 for (Player citizen : citizens) {
-                    if (killCount.get(citizen) == 0) continue;
                     player.sendMessage(ChatColor.YELLOW + citizen.getDisplayName() + ChatColor.GRAY + "(殺害数: " + killCount.get(citizen) + ")");
                 }
                 player.playSound(player.getLocation(), Sound.ENTITY_ENDERDRAGON_DEATH, 0.5F, 1);
